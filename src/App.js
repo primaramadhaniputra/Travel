@@ -1,24 +1,48 @@
-import logo from './logo.svg';
-import './App.css';
-
+import { Container, CssBaseline, Grid } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import Header from './Header/Header'
+import List from './List/List'
+import Map from './Map/Map'
+import getPlaceData from './API/index'
 function App() {
+  const [place, setPlace] = useState([])
+  const [coordinates, setCoordinates] = useState({})
+  const [bounds, setBounds] = useState([])
+  const [defCords, setDefCords] = useState([])
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(({ coords: { latitude, longitude } }) => {
+      setCoordinates({ lat: latitude, lng: longitude })
+      setDefCords({ lat: latitude, lng: longitude })
+    })
+  }, [])
+
+  useEffect(() => {
+    getPlaceData(bounds.sw, bounds.ne)
+      .then(data => {
+        setPlace(data)
+      })
+  }, [coordinates, bounds])
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <Header />
+      <Grid container my={3}>
+        <Grid item xs={12} md={4}>
+          <List place={place} />
+        </Grid>
+        <Grid item xs={12} md={8}>
+          <Map
+            setCoordinates={setCoordinates}
+            setBounds={setBounds}
+            coordinates={coordinates}
+            defCords={defCords}
+            place={place}
+          />
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
 
